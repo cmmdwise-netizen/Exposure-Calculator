@@ -313,4 +313,31 @@
             document.getElementById('focalResultItem').style.display = 'flex';
             document.getElementById('resAstroShutter').innerText = "~" + Math.round(500 / focalLength) + "s max";
         } else {
-            document.getElementById('focalResult
+            document.getElementById('focalResultItem').style.display = 'none';
+        }
+
+        document.getElementById('resTip').innerHTML = tipText;
+    }
+
+    function copyResults() {
+        let comp = document.getElementById('resComp').innerText;
+        let shutter = document.getElementById('resShutter').innerText;
+        let aperture = document.getElementById('resAperture').innerText;
+        let iso = document.getElementById('resIso').innerText;
+
+        let summary = `--- Field Exposure Results ---\n` +
+                      `Comp: ${comp}\n` +
+                      `Shutter: ${shutter}\n` +
+                      `Aperture: ${aperture}\n` +
+                      `ISO: ${iso}`;
+
+        navigator.clipboard.writeText(summary).then(() => {
+            alert("Results copied to clipboard!");
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+</script>
+
+</body>
+</html>
