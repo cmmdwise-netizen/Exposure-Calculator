@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Field Exposure Calculator</title>
-    <!-- PWA / Home Screen Icon Link -->
+    <title>Field Exposure & Dynamic Range Calculator</title>
+    <!-- PWA / Home Screen Icon Links -->
     <link rel="icon" href="icon.png" type="image/png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #d4af37; /* Elegant gold accent for fine art photography */
-            --border-color: #333333;
-            --input-bg: #2a2a2a;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --text-color: #e5e7eb;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
         }
 
         body {
@@ -33,40 +36,43 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
-        h2 {
-            text-align: center;
-            color: var(--accent-color);
+        h1 {
+            font-size: 1.25rem;
             margin-top: 0;
-            font-size: 1.4rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 600;
             letter-spacing: 0.5px;
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
         label {
             display: block;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            color: #b0b0b0;
+            font-size: 0.875rem;
+            margin-bottom: 6px;
+            color: var(--text-muted);
         }
 
-        select, input[type="text"], input[type="number"] {
+        select, input {
             width: 100%;
-            padding: 10px;
-            background: var(--input-bg);
-            color: var(--text-color);
+            padding: 10px 12px;
+            background-color: #2a2a2a;
             border: 1px solid var(--border-color);
             border-radius: 6px;
+            color: var(--text-color);
             font-size: 1rem;
             box-sizing: border-box;
+            transition: border-color 0.2s;
         }
 
         select:focus, input:focus {
@@ -74,121 +80,281 @@
             border-color: var(--accent-color);
         }
 
-        .results-card {
-            background: #161616;
-            border: 1px solid var(--accent-color);
-            border-radius: 8px;
-            padding: 15px;
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+
+        .results {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .highlight-rec {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 10px 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.875rem;
+            margin-top: 16px;
+            color: var(--text-color);
+        }
+
+        .gemini-link-btn {
+            display: block;
             text-align: center;
-            margin-top: 20px;
-        }
-
-        .results-card h3 {
-            margin: 0 0 5px 0;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #2a2a2a;
             color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-sizing: border-box;
+            margin-top: 12px;
+            transition: background-color 0.2s;
         }
 
-        .output-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin: 0;
+        .gemini-link-btn:hover {
+            background-color: #333333;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Wise Impressions Field Calculator</h2>
-
-        <!-- Base Meter Reading / Shutter Speed -->
-        <div class="input-group">
-            <label for="baseShutter">Metered Shutter Speed (seconds):</label>
-            <select id="baseShutter">
-                <option value="0.001">1/1000s</option>
-                <option value="0.002">1/500s</option>
-                <option value="0.004">1/250s</option>
-                <option value="0.008" selected>1/125s</option>
-                <option value="0.016">1/60s</option>
-                <option value="0.033">1/30s</option>
-                <option value="0.067">1/15s</option>
-                <option value="0.125">1/8s</option>
-                <option value="0.25">1/4s</option>
-                <option value="0.5">1/2s</option>
-                <option value="1">1s</option>
-                <option value="2">2s</option>
-                <option value="4">4s</option>
-                <option value="8">8s</option>
-                <option value="15">15s</option>
-                <option value="30">30s</option>
-            </select>
-        </div>
-
-        <!-- Filters & Optics Section -->
-        <div class="input-group" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px;">
-            <label style="font-weight: 600; color: var(--accent-color); margin-bottom: 8px;">Filters & Optics</label>
-            
-            <!-- Polarizer Toggle -->
-            <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                <input type="checkbox" id="cplFilter" style="width: 18px; height: 18px; margin-right: 8px; accent-color: var(--accent-color); cursor: pointer;">
-                <label for="cplFilter" style="font-weight: normal; margin-bottom: 0; cursor: pointer; color: var(--text-color);">Circular Polarizer (CPL) [ +1 Stop ]</label>
-            </div>
-
-            <!-- ND Filter Selection -->
-            <label for="ndFilter">Neutral Density (ND) Filter:</label>
-            <select id="ndFilter">
-                <option value="0">None (0 Stops)</option>
-                <option value="3">3-Stop ND (ND8)</option>
-                <option value="6">6-Stop ND (ND64)</option>
-                <option value="10" selected>10-Stop ND (ND1000)</option>
-                <option value="15">15-Stop ND (ND32000)</option>
-            </select>
-        </div>
-
-        <!-- Final Results Box -->
-        <div class="results-card">
-            <h3>Calculated Exposure</h3>
-            <p class="output-value" id="finalResult">--</p>
-        </div>
+<div class="container">
+    <h1>Field Exposure & Dynamic Range Calculator</h1>
+    
+    <div class="input-group">
+        <label for="sceneType">Scene Type</label>
+        <select id="sceneType">
+            <option value="sunset">Sunset / High Contrast</option>
+            <option value="waterfall">Waterfall / Moving Water</option>
+            <option value="landscape">General Landscape</option>
+            <option value="nightscape">Nightscape / Astro</option>
+        </select>
     </div>
 
-    <script>
-        function calculateExposure() {
-            // 1. Get base metered shutter speed
-            let baseTime = parseFloat(document.getElementById('baseShutter').value);
+    <div class="input-group">
+        <label for="baseShutter">Base Shutter Speed (seconds)</label>
+        <input type="text" id="baseShutter" value="1/15" placeholder="e.g. 1/15 or 2">
+    </div>
 
-            // 2. Calculate total filter stops
-            let filterStops = 0;
-            if (document.getElementById('cplFilter').checked) {
-                filterStops += 1; // CPL adds 1 stop
-            }
-            filterStops += parseInt(document.getElementById('ndFilter').value) || 0;
+    <div class="input-group">
+        <label for="baseAperture">Aperture (f-stop)</label>
+        <input type="text" id="baseAperture" value="f/11" placeholder="e.g. f/11">
+    </div>
 
-            // 3. Apply stops math (each stop doubles the exposure time)
-            let finalTime = baseTime * Math.pow(2, filterStops);
+    <div class="input-group">
+        <label for="baseIso">ISO</label>
+        <input type="number" id="baseIso" value="64" placeholder="e.g. 64">
+    </div>
 
-            // 4. Format and display result cleanly
-            let outputText = "";
-            if (finalTime >= 1) {
-                outputText = finalTime.toFixed(1).replace(/\.0$/, '') + " seconds";
-            } else {
-                let fraction = Math.round(1 / finalTime);
-                outputText = "1/" + fraction + "s";
-            }
+    <!-- Filters & Optics Section -->
+    <div class="input-group" style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px;">
+        <label style="font-weight: 600; color: var(--accent-color); margin-bottom: 8px;">Filters & Optics</label>
+        
+        <!-- Polarizer Toggle -->
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input type="checkbox" id="cplFilter" style="width: 18px; height: 18px; margin-right: 8px; accent-color: var(--accent-color); cursor: pointer;">
+            <label for="cplFilter" style="font-weight: normal; margin-bottom: 0; cursor: pointer; color: var(--text-color);">Circular Polarizer (CPL) [ +1 Stop ]</label>
+        </div>
 
-            document.getElementById('finalResult').innerText = outputText;
+        <!-- ND Filter Selection -->
+        <label for="ndFilter">Neutral Density (ND) Filter:</label>
+        <select id="ndFilter" style="margin-bottom: 10px;">
+            <option value="0">None (0 Stops)</option>
+            <option value="3">3-Stop ND (ND8)</option>
+            <option value="6">6-Stop ND (ND64)</option>
+            <option value="10">10-Stop ND (ND1000)</option>
+            <option value="15">15-Stop ND (ND32000)</option>
+        </select>
+
+        <!-- Focal Length Input -->
+        <label for="focalLength">Focal Length (mm):</label>
+        <input type="number" id="focalLength" value="24" placeholder="e.g. 24 or 70">
+    </div>
+
+    <div class="input-group">
+        <label for="highlightBias">Highlight Protection Bias (EV)</label>
+        <select id="highlightBias">
+            <option value="-0.3">-1/3 EV (Conservative)</option>
+            <option value="-0.7" selected>-2/3 EV (Standard Sunset/Bright Sky)</option>
+            <option value="-1.0">-1.0 EV (Extreme Contrast)</option>
+            <option value="0.0">0.0 EV (Balanced / Flat Light)</option>
+        </select>
+    </div>
+
+    <button onclick="calculateExposure()">Calculate Adjusted Exposure</button>
+
+    <div class="results" id="resultsSection" style="display: none;">
+        <div class="result-item">
+            <span class="result-label">Recommended Comp:</span>
+            <span class="result-value" id="resComp">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Target Shutter Speed:</span>
+            <span class="result-value" id="resShutter">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Suggested Aperture:</span>
+            <span class="result-value" id="resAperture">-</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Optimized ISO:</span>
+            <span class="result-value" id="resIso">-</span>
+        </div>
+        <div class="result-item" id="focalResultItem" style="display: none;">
+            <span class="result-label">Max Astro Shutter (Rule):</span>
+            <span class="result-value" id="resAstroShutter">-</span>
+        </div>
+        <div class="highlight-rec" id="resTip">
+            <!-- Dynamic tip goes here -->
+        </div>
+
+        <!-- Action Buttons -->
+        <button onclick="copyResults()" class="btn-success" style="margin-top: 16px;">Copy Results to Clipboard</button>
+        <a href="https://gemini.google.com" target="_blank" class="gemini-link-btn">💬 Ask Gemini for Field Advice</a>
+    </div>
+</div>
+
+<script>
+    function parseShutter(val) {
+        val = val.trim();
+        if (val.includes('/')) {
+            let parts = val.split('/');
+            return parseFloat(parts[0]) / parseFloat(parts[1]);
+        }
+        return parseFloat(val);
+    }
+
+    function formatShutter(seconds) {
+        if (seconds >= 1) {
+            return seconds.toFixed(1) + "s";
+        } else {
+            let denom = Math.round(1 / seconds);
+            return "1/" + denom + "s";
+        }
+    }
+
+    function calculateExposure() {
+        let scene = document.getElementById('sceneType').value;
+        let shutterInput = document.getElementById('baseShutter').value;
+        let apertureInput = document.getElementById('baseAperture').value;
+        let isoInput = parseInt(document.getElementById('baseIso').value);
+        let bias = parseFloat(document.getElementById('highlightBias').value);
+        let focalLength = parseFloat(document.getElementById('focalLength').value) || 24;
+
+        let baseSeconds = parseShutter(shutterInput);
+        
+        // 1. Apply exposure bias adjustment for highlight protection
+        let biasFactor = Math.pow(2, bias);
+        let adjustedSeconds = baseSeconds * biasFactor;
+
+        // 2. Gather filter stops and apply them
+        let filterStops = 0;
+        if (document.getElementById('cplFilter').checked) {
+            filterStops += 1; // CPL adds 1 stop
+        }
+        filterStops += parseInt(document.getElementById('ndFilter').value) || 0;
+
+        // Multiply adjusted exposure by filter stops (each stop doubles exposure time)
+        let finalSeconds = adjustedSeconds * Math.pow(2, filterStops);
+
+        let tipText = "";
+        if (scene === 'sunset') {
+            tipText = "<strong>Tip:</strong> Watch the live histogram closely. Clipping highlights in the sun or bright clouds is irreversible in post; protect the highlights and lift shadows later.";
+        } else if (scene === 'waterfall') {
+            tipText = "<strong>Tip:</strong> ND filter stacking active. Ensure your tripod is weighted down and mirror lock-up or self-timer is enabled to eliminate micro-vibrations.";
+        } else if (scene === 'nightscape') {
+            // Calculate 500 Rule / NPF guidance for full-frame/crop general estimate
+            let maxAstroSeconds = Math.round(500 / focalLength);
+            tipText = `<strong>Astro Tip:</strong> At ${focalLength}mm, the 500 rule suggests keeping your shutter under ~${maxAstroSeconds}s to avoid noticeable star trailing.`;
+        } else {
+            tipText = "<strong>Tip:</strong> Keep an eye on your blinkies to ensure shadow noise remains manageable while retaining highlight details.";
         }
 
-        // Attach event listeners to instantly recalculate on any change
-        document.getElementById('baseShutter').addEventListener('change', calculateExposure);
-        document.getElementById('cplFilter').addEventListener('change', calculateExposure);
-        document.getElementById('ndFilter').addEventListener('change', calculateExposure);
+        // Display results
+        document.getElementById('resultsSection').style.display = 'block';
+        document.getElementById('resComp').innerText = bias + " EV" + (filterStops > fnCheckStops(filterStops) ? "" : ""); // simple format
+        document.getElementById('resShutter').innerText = formatShutter(finalSeconds);
+        document.getElementById('resAperture').innerText = apertureInput;
+        document.getElementById('resIso').innerText = isoInput;
 
-        // Run calculation immediately on load
-        calculateExposure();
-    </script>
+        // Handle optional display for astro shutter rule if nightscape selected
+        if (scene === 'nightscape') {
+            document.getElementById('focalResultItem').style.display = 'flex';
+            document.getElementById('resAstroShutter').innerText = "~" + Math.round(500 / focalLength) + "s max";
+        } else {
+            document.getElementById('focalResultItem').style.display = 'none';
+        }
+
+        document.getElementById('resTip').innerHTML = tipText;
+    }
+
+    function fnCheckStops(val) {
+        return val;
+    }
+
+    function copyResults() {
+        let comp = document.getElementById('resComp').innerText;
+        let shutter = document.getElementById('resShutter').innerText;
+        let aperture = document.getElementById('resAperture').innerText;
+        let iso = document.getElementById('resIso').innerText;
+
+        let summary = `--- Field Exposure Results ---\n` +
+                      `Comp: ${comp}\n` +
+                      `Shutter: ${shutter}\n` +
+                      `Aperture: ${aperture}\n` +
+                      `ISO: ${iso}`;
+
+        navigator.clipboard.writeText(summary).then(() => {
+            alert("Results copied to clipboard!");
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+</script>
+
 </body>
 </html>
