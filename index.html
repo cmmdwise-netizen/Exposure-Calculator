@@ -10,7 +10,7 @@
     <style>
         :root {
             --bg-color: #121212;
-            --card-bg: #1e1e1e;
+            --card-bg: rgba(30, 30, 30, 0.90); /* Slightly transparent card for background visibility */
             --accent-color: #3b82f6;
             --accent-hover: #2563eb;
             --success-color: #10b981;
@@ -22,7 +22,10 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
+            background-image: linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.85)), url('bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -34,6 +37,7 @@
 
         .container {
             background-color: var(--card-bg);
+            backdrop-filter: blur(8px); /* Modern blur effect for background photo */
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 24px;
@@ -307,7 +311,6 @@
         } else if (scene === 'waterfall') {
             tipText = "<strong>Tip:</strong> ND filter stacking active. Ensure your tripod is weighted down and mirror lock-up or self-timer is enabled to eliminate micro-vibrations.";
         } else if (scene === 'nightscape') {
-            // Calculate 500 Rule / NPF guidance for full-frame/crop general estimate
             let maxAstroSeconds = Math.round(500 / focalLength);
             tipText = `<strong>Astro Tip:</strong> At ${focalLength}mm, the 500 rule suggests keeping your shutter under ~${maxAstroSeconds}s to avoid noticeable star trailing.`;
         } else {
@@ -316,12 +319,11 @@
 
         // Display results
         document.getElementById('resultsSection').style.display = 'block';
-        document.getElementById('resComp').innerText = bias + " EV" + (filterStops > fnCheckStops(filterStops) ? "" : ""); // simple format
+        document.getElementById('resComp').innerText = bias + " EV";
         document.getElementById('resShutter').innerText = formatShutter(finalSeconds);
         document.getElementById('resAperture').innerText = apertureInput;
         document.getElementById('resIso').innerText = isoInput;
 
-        // Handle optional display for astro shutter rule if nightscape selected
         if (scene === 'nightscape') {
             document.getElementById('focalResultItem').style.display = 'flex';
             document.getElementById('resAstroShutter').innerText = "~" + Math.round(500 / focalLength) + "s max";
@@ -330,10 +332,6 @@
         }
 
         document.getElementById('resTip').innerHTML = tipText;
-    }
-
-    function fnCheckStops(val) {
-        return val;
     }
 
     function copyResults() {
