@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Field Exposure & Dynamic Range Calculator</title>
-    <!-- PWA / Home Screen Icon Links -->
     <link rel="icon" href="icon.png" type="image/png">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
         :root {
             --bg-color: #121212;
-            --card-bg: rgba(30, 30, 30, 0.90); /* Slightly transparent card for background visibility */
+            --card-bg: #1e1e1e;
             --accent-color: #3b82f6;
             --accent-hover: #2563eb;
             --success-color: #10b981;
@@ -22,10 +21,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-image: linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.85)), url('bg.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -37,7 +33,6 @@
 
         .container {
             background-color: var(--card-bg);
-            backdrop-filter: blur(8px); /* Modern blur effect for background photo */
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 24px;
@@ -194,17 +189,14 @@
         <input type="number" id="baseIso" value="64" placeholder="e.g. 64">
     </div>
 
-    <!-- Filters & Optics Section -->
     <div class="input-group" style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px;">
         <label style="font-weight: 600; color: var(--accent-color); margin-bottom: 8px;">Filters & Optics</label>
         
-        <!-- Polarizer Toggle -->
         <div style="display: flex; align-items: center; margin-bottom: 10px;">
             <input type="checkbox" id="cplFilter" style="width: 18px; height: 18px; margin-right: 8px; accent-color: var(--accent-color); cursor: pointer;">
             <label for="cplFilter" style="font-weight: normal; margin-bottom: 0; cursor: pointer; color: var(--text-color);">Circular Polarizer (CPL) [ +1 Stop ]</label>
         </div>
 
-        <!-- ND Filter Selection -->
         <label for="ndFilter">Neutral Density (ND) Filter:</label>
         <select id="ndFilter" style="margin-bottom: 10px;">
             <option value="0">None (0 Stops)</option>
@@ -214,7 +206,6 @@
             <option value="15">15-Stop ND (ND32000)</option>
         </select>
 
-        <!-- Focal Length Input -->
         <label for="focalLength">Focal Length (mm):</label>
         <input type="number" id="focalLength" value="24" placeholder="e.g. 24 or 70">
     </div>
@@ -253,10 +244,8 @@
             <span class="result-value" id="resAstroShutter">-</span>
         </div>
         <div class="highlight-rec" id="resTip">
-            <!-- Dynamic tip goes here -->
-        </div>
+            </div>
 
-        <!-- Action Buttons -->
         <button onclick="copyResults()" class="btn-success" style="margin-top: 16px;">Copy Results to Clipboard</button>
         <a href="https://gemini.google.com" target="_blank" class="gemini-link-btn">💬 Ask Gemini for Field Advice</a>
     </div>
@@ -291,18 +280,15 @@
 
         let baseSeconds = parseShutter(shutterInput);
         
-        // 1. Apply exposure bias adjustment for highlight protection
         let biasFactor = Math.pow(2, bias);
         let adjustedSeconds = baseSeconds * biasFactor;
 
-        // 2. Gather filter stops and apply them
         let filterStops = 0;
         if (document.getElementById('cplFilter').checked) {
-            filterStops += 1; // CPL adds 1 stop
+            filterStops += 1;
         }
         filterStops += parseInt(document.getElementById('ndFilter').value) || 0;
 
-        // Multiply adjusted exposure by filter stops (each stop doubles exposure time)
         let finalSeconds = adjustedSeconds * Math.pow(2, filterStops);
 
         let tipText = "";
@@ -317,7 +303,6 @@
             tipText = "<strong>Tip:</strong> Keep an eye on your blinkies to ensure shadow noise remains manageable while retaining highlight details.";
         }
 
-        // Display results
         document.getElementById('resultsSection').style.display = 'block';
         document.getElementById('resComp').innerText = bias + " EV";
         document.getElementById('resShutter').innerText = formatShutter(finalSeconds);
@@ -328,31 +313,4 @@
             document.getElementById('focalResultItem').style.display = 'flex';
             document.getElementById('resAstroShutter').innerText = "~" + Math.round(500 / focalLength) + "s max";
         } else {
-            document.getElementById('focalResultItem').style.display = 'none';
-        }
-
-        document.getElementById('resTip').innerHTML = tipText;
-    }
-
-    function copyResults() {
-        let comp = document.getElementById('resComp').innerText;
-        let shutter = document.getElementById('resShutter').innerText;
-        let aperture = document.getElementById('resAperture').innerText;
-        let iso = document.getElementById('resIso').innerText;
-
-        let summary = `--- Field Exposure Results ---\n` +
-                      `Comp: ${comp}\n` +
-                      `Shutter: ${shutter}\n` +
-                      `Aperture: ${aperture}\n` +
-                      `ISO: ${iso}`;
-
-        navigator.clipboard.writeText(summary).then(() => {
-            alert("Results copied to clipboard!");
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-        });
-    }
-</script>
-
-</body>
-</html>
+            document.getElementById('focalResult
